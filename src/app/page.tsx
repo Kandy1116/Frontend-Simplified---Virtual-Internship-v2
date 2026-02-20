@@ -16,9 +16,9 @@ export default function HomePage() {
       <main>
         <Features />
         <Statistics />
-        <Numbers />
         <Highlights />
         <Cta />
+        <Numbers />
       </main>
       <Footer />
     </>

@@ -4,8 +4,7 @@ import { AiFillFileText, AiFillBulb, AiFillAudio } from 'react-icons/ai';
 const Features = () => {
   return (
     <section id="features">
-      <div className="container">
-        <div className="row">
+      <div className="row">
           <div className="section__title">
             Understand books in few minutes
           </div>
@@ -39,7 +38,6 @@ const Features = () => {
             </div>
           </div>
         </div>
-      </div>
     </section>
   );
 };

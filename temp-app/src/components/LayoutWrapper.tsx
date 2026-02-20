@@ -8,7 +8,7 @@ const LayoutWrapper = ({ children }: { children: React.ReactNode }) => {
   const pathname = usePathname();
 
   const appPaths = ['/for-you', '/book', '/player', '/settings', '/my-library', '/highlights'];
-  const isAppPage = appPaths.some(path => pathname.startsWith(path));
+  const isAppPage = appPaths.some(path => pathname && pathname.startsWith(path));
 
   if (isAppPage) {
     return (

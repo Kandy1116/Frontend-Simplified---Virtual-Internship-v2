@@ -2,8 +2,7 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { Book } from "../types/Book";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faSearch, faTimes } from "@fortawesome/free-solid-svg-icons";
+import { FiSearch, FiX } from "react-icons/fi";
 
 const SearchBar = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -59,7 +58,6 @@ const SearchBar = () => {
 
   return (
     <div className="search__wrapper" ref={searchRef}>
-      <div className="search__input--wrapper">
         <input
           type="text"
           className="search__input"
@@ -67,16 +65,13 @@ const SearchBar = () => {
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
-        {searchTerm ? (
-            <div className="search__icon--clear" onClick={clearSearch}>
-                <FontAwesomeIcon icon={faTimes} />
-            </div>
-        ) : (
-            <div className="search__icon">
-                <FontAwesomeIcon icon={faSearch} />
-            </div>
-        )}
-      </div>
+        <div className="search__icon">
+          {searchTerm ? (
+              <FiX onClick={clearSearch} style={{cursor: 'pointer'}}/>
+          ) : (
+              <FiSearch />
+          )}
+        </div>
       {searchTerm && (
         <div className="search__results--wrapper">
           {loading ? (

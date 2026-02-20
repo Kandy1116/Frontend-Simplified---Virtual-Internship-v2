@@ -5,8 +5,7 @@ import { BsStarFill, BsStarHalf } from 'react-icons/bs';
 const Numbers = () => {
   return (
     <section id="numbers">
-      <div className="container">
-        <div className="row">
+      <div className="row">
           <h2 className="section__title">Start growing with Summarist now</h2>
           <div className="numbers__wrapper">
             <div className="numbers">
@@ -42,7 +41,6 @@ const Numbers = () => {
               <p className="numbers__sub--title">Of Summarist members create a better reading habit</p>
             </div>
           </div>
-        </div>
       </div>
     </section>
   );

@@ -13,15 +13,18 @@ const Nav = () => {
         </figure>
         <ul className="nav__list--wrapper">
 
-          {user ? (
-             <li className="nav__list nav__list--login" onClick={logOut}>
-              Logout
-            </li>
-          ) : (
-             <li className="nav__list nav__list--login" onClick={openModal}>
-              Login
-            </li>
-          )}
+          <li className="nav__list nav__list--login" onClick={openModal}>
+            Login
+          </li>
+          <li className="nav__list">
+            About
+          </li>
+          <li className="nav__list">
+            Contact
+          </li>
+          <li className="nav__list">
+            Help
+          </li>
         </ul>
       </div>
     </nav>

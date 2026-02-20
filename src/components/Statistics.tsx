@@ -40,8 +40,7 @@ const Statistics = () => {
 
   return (
     <section id="statistics">
-      <div className="container">
-        <div className="row">
+      <div className="row">
           <div className="statistics__wrapper">
             <div className="statistics__content--header">
               {headings1.map((heading, index) => (
@@ -95,7 +94,6 @@ const Statistics = () => {
             </div>
           </div>
         </div>
-      </div>
     </section>
   );
 };

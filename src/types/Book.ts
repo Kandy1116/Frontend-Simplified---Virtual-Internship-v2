@@ -8,12 +8,12 @@ export interface Book {
   totalRating: number;
   averageRating: number;
   keyIdeas: string[];
-  type: string;
-  status: string;
+  type: 'audio' | 'text' | 'audio & text';
+  status: 'selected' | 'recommended' | 'suggested';
   subscriptionRequired: boolean;
   summary: string;
   tags: string[];
   bookDescription: string;
   authorDescription: string;
-  duration: number;
+  duration?: number;
 }

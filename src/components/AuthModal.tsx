@@ -2,40 +2,30 @@
 import React, { useState } from 'react';
 import Modal from 'react-modal';
 import { useAuth } from '../contexts/AuthContext';
-import { FirebaseError } from 'firebase/app';
-import { FaUserAlt } from 'react-icons/fa';
-import { MdClose } from 'react-icons/md';
+import { FaGoogle, FaUser, FaTimes } from 'react-icons/fa';
 
-const AuthModal: React.FC = () => {
-  const { isModalOpen, closeModal, signUp, logIn, googleLogin, guestLogin, forgotPassword } = useAuth();
+interface AuthModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
+  const { signUp, logIn, googleLogin, guestLogin, forgotPassword } = useAuth();
   const [isLoginView, setIsLoginView] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
 
-  const handleAuthError = (err: any) => {
-    setMessage('');
-    if (err instanceof FirebaseError) {
-      switch (err.code) {
-        case 'auth/invalid-email':
-          setError('Invalid email address.');
-          break;
-        case 'auth/user-not-found':
-          setError('No account found with this email.');
-          break;
-        case 'auth/wrong-password':
-          setError('Incorrect password.');
-          break;
-        case 'auth/weak-password':
-          setError('Password should be at least 6 characters.');
-          break;
-        case 'auth/email-already-in-use':
-          setError('An account already exists with this email.');
-          break;
-        default:
-          setError('An unexpected error occurred. Please try again.');
-      }
+  const handleAuthError = (error: any) => {
+    if (error.code === 'auth/user-not-found') {
+      setError('User not found. Please check your email or sign up.');
+    } else if (error.code === 'auth/wrong-password') {
+      setError('Invalid password. Please try again.');
+    } else if (error.code === 'auth/invalid-email') {
+      setError('Please enter a valid email address.');
+    } else if (error.code === 'auth/weak-password') {
+      setError('Password should be at least 6 characters.');
     } else {
       setError('An unexpected error occurred. Please try again.');
     }
@@ -51,136 +41,125 @@ const AuthModal: React.FC = () => {
       } else {
         await signUp(email, password);
       }
-    } catch (err) {
-      handleAuthError(err);
+      onClose();
+    } catch (error) {
+      handleAuthError(error);
     }
   };
 
   const handleGoogleLogin = async () => {
-    setError('');
-    setMessage('');
     try {
       await googleLogin();
-    } catch (err) {
-      handleAuthError(err);
+      onClose();
+    } catch (error) {
+      handleAuthError(error);
     }
   };
 
   const handleGuestLogin = async () => {
-    setError('');
-    setMessage('');
     try {
       await guestLogin();
-    } catch (err) {
-      handleAuthError(err);
+      onClose();
+    } catch (error) {
+      handleAuthError(error);
     }
   };
 
-  const handlePasswordReset = async (e: React.MouseEvent) => {
-    e.preventDefault();
-    setError('');
-    setMessage('');
+  const handlePasswordReset = async () => {
     if (!email) {
       setError('Please enter your email address to reset your password.');
       return;
     }
     try {
       await forgotPassword(email);
-      setMessage('Password reset email sent! Check your inbox.');
-    } catch (err) {
-      handleAuthError(err);
+      setMessage('A password reset link has been sent to your email.');
+      setError('');
+    } catch (error) {
+      handleAuthError(error);
     }
   };
 
-  const switchView = (e: React.MouseEvent) => {
-    e.preventDefault();
+  const switchView = () => {
     setIsLoginView(!isLoginView);
     setError('');
     setMessage('');
-    setEmail('');
-    setPassword('');
   };
 
   return (
-    <Modal
-      isOpen={isModalOpen}
-      onRequestClose={closeModal}
-      className="modal__container"
-      overlayClassName="modal"
-    >
-      <div className="modal__header">
-        <h2 className="modal__title">{isLoginView ? 'Log in to Summarist' : 'Sign up to Summarist'}</h2>
-        <button className="modal__close" onClick={closeModal}>
-          <MdClose />
+    <Modal isOpen={isOpen} onRequestClose={onClose} className="auth-modal__container" overlayClassName="auth-modal">
+      <div className="auth-modal__header">
+        <h2 className="auth-modal__title">
+          {isLoginView ? 'Log in to Summarist' : 'Sign up to Summarist'}
+        </h2>
+        <button onClick={onClose} className="auth-modal__close-btn">
+          <FaTimes />
         </button>
       </div>
-
-      <div className="modal__body">
-        {error && <p className="modal__error">{error}</p>}
-        {message && <p className="modal__message">{message}</p>}
-
+      <div className="auth-modal__body">
+        {error && <p className="auth-modal__error">{error}</p>}
+        {message && <p className="auth-modal__message">{message}</p>}
+        
         {isLoginView ? (
           <>
-            <button className="modal__btn modal__btn--guest" onClick={handleGuestLogin}>
-              <FaUserAlt />
+            <button className="auth-modal__btn auth-modal__btn--guest" onClick={handleGuestLogin}>
+              <FaUser className="auth-modal__btn-icon" />
               <span>Login as a Guest</span>
             </button>
-            <div className="modal__separator">
-              <span>or</span>
+            <div className="auth-modal__separator">
+              <span className="auth-modal__separator-text">or</span>
             </div>
-            <button className="modal__btn modal__btn--google" onClick={handleGoogleLogin}>
-              <img src="/assets/google.png" alt="Google logo" className="modal__btn--logo"/>
+            <button className="auth-modal__btn auth-modal__btn--google" onClick={handleGoogleLogin}>
+              <FaGoogle className="auth-modal__btn-icon" />
               <span>Login with Google</span>
             </button>
-            <div className="modal__separator">
-              <span>or</span>
-            </div>
           </>
         ) : (
-          <div className="modal__separator">
-            <span>or</span>
-          </div>
+          <button className="auth-modal__btn auth-modal__btn--google" onClick={handleGoogleLogin}>
+            <FaGoogle className="auth-modal__btn-icon" />
+            <span>Sign up with Google</span>
+          </button>
         )}
 
-        <form className="modal__form" onSubmit={handleEmailPasswordSubmit}>
-          <input
-            type="email"
-            className="modal__input"
-            placeholder="Email Address"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-          <input
-            type="password"
-            className="modal__input"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-          <button type="submit" className="modal__btn modal__btn--login">
-            <span>{isLoginView ? 'Login' : 'Sign up'}</span>
+        <div className="auth-modal__separator">
+          <span className="auth-modal__separator-text">or</span>
+        </div>
+
+        <form onSubmit={handleEmailPasswordSubmit} className="auth-modal__form">
+          <div className="auth-modal__input-group">
+            <input
+              type="email"
+              placeholder="Email Address"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              className="auth-modal__input"
+            />
+          </div>
+          <div className="auth-modal__input-group">
+            <input
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              className="auth-modal__input"
+            />
+          </div>
+          <button type="submit" className="auth-modal__btn auth-modal__btn--primary">
+            {isLoginView ? 'Login' : 'Sign up'}
           </button>
         </form>
 
         {isLoginView && (
-          <a href="#" onClick={handlePasswordReset} className="modal__forgot-password">
+          <a onClick={handlePasswordReset} className="auth-modal__link auth-modal__link--forgot">
             Forgot your password?
           </a>
         )}
       </div>
-
-      <div className="modal__footer">
-        {isLoginView ? (
-          <p>
-            Don't have an account? <a href="#" onClick={switchView}>Sign up</a>
-          </p>
-        ) : (
-          <p>
-            Already have an account? <a href="#" onClick={switchView}>Log in</a>
-          </p>
-        )}
+      <div className="auth-modal__footer">
+        <a onClick={switchView} className="auth-modal__link">
+          {isLoginView ? "Don't have an account?" : 'Already have an account?'}
+        </a>
       </div>
     </Modal>
   );

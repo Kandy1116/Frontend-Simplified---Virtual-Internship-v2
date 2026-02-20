@@ -23,6 +23,8 @@ interface AuthContextType {
   googleLogin: () => Promise<firebase.auth.UserCredential>;
   guestLogin: () => Promise<firebase.auth.UserCredential>;
   forgotPassword: (email: string) => Promise<void>;
+  library: string[];
+  toggleLibrary: (bookId: string) => void;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -32,6 +34,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<firebase.User | null>(null);
   const [isSubscribed, setIsSubscribed] = useState(false); // Placeholder
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [library, setLibrary] = useState<string[]>([]);
   const router = useRouter();
 
   useEffect(() => {
@@ -52,6 +55,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setIsModalOpen(true);
   };
   const closeModal = () => setIsModalOpen(false);
+
+  const toggleLibrary = (bookId: string) => {
+    setLibrary((prevLibrary) =>
+      prevLibrary.includes(bookId)
+        ? prevLibrary.filter((id) => id !== bookId)
+        : [...prevLibrary, bookId]
+    );
+  };
 
   const handleAuthSuccess = () => {
     closeModal();
@@ -115,20 +126,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     });
   };
 
-  const value: AuthContextType = {
+  const value = useMemo(() => ({
     user,
     auth,
+    isSubscribed,
     isModalOpen,
     openModal,
     closeModal,
-    isSubscribed, // Placeholder
     signUp,
     logIn,
     logOut,
     googleLogin,
     guestLogin,
     forgotPassword,
-  };
+    library,
+    toggleLibrary,
+  }), [user, auth, isSubscribed, isModalOpen, library]);
 
   if (!auth) {
     return null; // Or a loading spinner, so children don't render without auth
@@ -137,7 +150,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   return (
     <AuthContext.Provider value={value}>
       {children}
-      {isModalOpen && <AuthModal />}
+      <AuthModal isOpen={isModalOpen} onClose={closeModal} />
     </AuthContext.Provider>
   );
 };
