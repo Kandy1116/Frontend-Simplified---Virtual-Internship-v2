@@ -10,12 +10,15 @@ if (typeof window !== 'undefined') {
   Modal.setAppElement('body');
 }
 
+import { Book } from "../types/Book";
+
 interface AuthContextType {
   user: firebase.User | null;
+  loading: boolean;
   auth: firebase.auth.Auth | null;
   isSubscribed: boolean;
   isModalOpen: boolean;
-  openModal: () => void;
+  openAuthModal: () => void;
   closeModal: () => void;
   signUp: (email: string, password: string) => Promise<firebase.auth.UserCredential>;
   logIn: (email: string, password: string) => Promise<firebase.auth.UserCredential>;
@@ -23,8 +26,8 @@ interface AuthContextType {
   googleLogin: () => Promise<firebase.auth.UserCredential>;
   guestLogin: () => Promise<firebase.auth.UserCredential>;
   forgotPassword: (email: string) => Promise<void>;
-  library: string[];
-  toggleLibrary: (bookId: string) => void;
+  library: Book[];
+  toggleLibrary: (book: Book) => void;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -32,9 +35,10 @@ const AuthContext = createContext<AuthContextType | null>(null);
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [auth, setAuth] = useState<firebase.auth.Auth | null>(null);
   const [user, setUser] = useState<firebase.User | null>(null);
+  const [loading, setLoading] = useState(true);
   const [isSubscribed, setIsSubscribed] = useState(false); // Placeholder
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [library, setLibrary] = useState<string[]>([]);
+  const [library, setLibrary] = useState<Book[]>([]);
   const router = useRouter();
 
   useEffect(() => {
@@ -46,21 +50,32 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     const unsubscribe = auth.onAuthStateChanged((currentUser) => {
       setUser(currentUser);
+      // A real app would check the user's subscription status from a database
+      if (currentUser) {
+        // For guest user, give them a subscription for demo purposes
+        if (currentUser.email === 'guest@gmail.com') {
+          setIsSubscribed(true);
+        } else {
+          setIsSubscribed(false);
+        }
+      } else {
+        setIsSubscribed(false);
+      }
+      setLoading(false);
     });
     return () => unsubscribe();
   }, [auth]);
 
-  const openModal = () => {
-    console.log("Opening modal");
+  const openAuthModal = () => {
     setIsModalOpen(true);
   };
   const closeModal = () => setIsModalOpen(false);
 
-  const toggleLibrary = (bookId: string) => {
+  const toggleLibrary = (book: Book) => {
     setLibrary((prevLibrary) =>
-      prevLibrary.includes(bookId)
-        ? prevLibrary.filter((id) => id !== bookId)
-        : [...prevLibrary, bookId]
+      prevLibrary.some((libBook) => libBook.id === book.id)
+        ? prevLibrary.filter((libBook) => libBook.id !== book.id)
+        : [...prevLibrary, book]
     );
   };
 
@@ -128,10 +143,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const value = useMemo(() => ({
     user,
+    loading,
     auth,
     isSubscribed,
     isModalOpen,
-    openModal,
+    openAuthModal,
     closeModal,
     signUp,
     logIn,
@@ -141,10 +157,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     forgotPassword,
     library,
     toggleLibrary,
-  }), [user, auth, isSubscribed, isModalOpen, library]);
+  }), [user, auth, isSubscribed, isModalOpen, library, loading]);
 
-  if (!auth) {
-    return null; // Or a loading spinner, so children don't render without auth
+  if (loading) {
+    return null; // Or a loading spinner
   }
 
   return (

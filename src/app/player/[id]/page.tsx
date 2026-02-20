@@ -1,7 +1,7 @@
-"use client";
-import { useParams } from "next/navigation";
-import useSWR from "swr";
-import AudioPlayer from "@/components/AudioPlayer";
+'use client';
+import { useParams } from 'next/navigation';
+import useSWR from 'swr';
+import AudioPlayer from '@/components/player/AudioPlayer';
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
@@ -21,10 +21,8 @@ const PlayerPage = () => {
   return (
     <div className="player__wrapper">
       <div className="player__container">
-        <h1 className="player__title">{book.title}</h1>
-        <p className="player__summary" style={{ whiteSpace: "pre-line" }}>
-          {book.summary}
-        </p>
+          <h1 className="player__title">{book.title}</h1>
+          <p className="player__summary">{book.bookDescription}</p>
       </div>
       <AudioPlayer book={book} />
     </div>
